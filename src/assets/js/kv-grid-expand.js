@@ -148,14 +148,21 @@ var kvExpandRow;
                     var collAll = $h.isCollapsed($hdrIcon), expAll = $h.isExpanded($hdrIcon),
                         opt = $.extend(true, {}, options, {expandAll: expAll, collapseAll: collAll});
                     beginLoading($hdrCell);
+                    let nextLevelExpandRowColumns = null;
                     if (expAll) {
                         expandHeaderCell();
                         $grid.trigger('kvexprow:toggleAll', [extraData, false]);
+                        nextLevelExpandRowColumns = $hdrCell.closest('table').find('.kv-state-collapsed');
                     } else if (collAll) {
                         collapseHeaderCell();
                         $grid.trigger('kvexprow:toggleAll', [extraData, true]);
+                        nextLevelExpandRowColumns = $hdrCell.closest('table').find('.kv-state-expanded');
                     }
-                    kvExpandRow(opt, id);
+                    if (nextLevelExpandRowColumns) {
+                        nextLevelExpandRowColumns.trigger('click');
+                    }
+                    endLoading($hdrCell);
+                    // kvExpandRow(opt, id);
                 });
             };
         ToggleManager = function ($element) {
@@ -241,7 +248,7 @@ var kvExpandRow;
             load: function (postProcess) {
                 var self = this, $cell = self.$cell, $detail = self.$detail, vKey = self.vKey, vInd = self.vInd,
                     params = $.extend({expandRowKey: vKey, expandRowInd: vInd}, extraData),
-                    reload = enableCache ? $detail.html().length === 0 : true;
+                    reload = enableCache ? (!$detail.html() || $detail.html().length === 0) : true;
                 if (detailUrl.length > 0 && reload) {
                     $.ajax({
                         type: 'POST',
