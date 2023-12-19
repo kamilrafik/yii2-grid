@@ -56,7 +56,7 @@ var kvExpandRow;
             $hdrIcon = $hdrCell.find('.kv-expand-header-icon'),
             collapseAll = options.collapseAll === undefined ? false : options.collapseAll,
             expandAll = options.expandAll === undefined ? false : options.expandAll,
-            $cells = $grid.find('td.kv-expand-icon-cell' + idCss + ' .kv-expand-row:not(.kv-state-disabled)'),
+            $cells = $grid.find('td.kv-expand-icon-cell' + idCss + ' > .kv-expand-row:not(.kv-state-disabled)'),
             numRows = $cells.length, progress = 'kv-expand-detail-loading',
             getCols = function () {
                 var $col = $grid.find('td.kv-expand-icon-cell' + idCss + ':first'),
@@ -294,13 +294,25 @@ var kvExpandRow;
                 $detail.wrap('<td colspan="' + cols + '">').parent().wrap(newRow);
                 $icon.html(collapseIcon);
                 $cell.attr('title', collapseTitle);
+                let fnShowComplete = function () {
+                    let nextLevelExpandRowColumns = $(this).find('[data-expand-row-column-hash-var]');
+                    if (nextLevelExpandRowColumns.length) {
+                        eval(
+                            'kvExpandRow('
+                            + nextLevelExpandRowColumns.attr('data-expand-row-column-hash-var')
+                            + ', "'
+                            + nextLevelExpandRowColumns.attr('data-expand-row-column-col-id')
+                            + '");'
+                        );
+                    }
+                };
                 if (animate) {
                     $detail.slideDown(duration, function () {
                         $h.setCollapsed($icon);
-                        $detail.show();
+                        $detail.show(fnShowComplete);
                     });
                 } else {
-                    $detail.show();
+                    $detail.show(fnShowComplete);
                     $h.setCollapsed($icon);
                 }
                 // needed when used together with grouping
