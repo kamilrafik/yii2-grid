@@ -339,6 +339,8 @@ var kvExpandRow;
                 if ($h.isCollapsed($icon)) {
                     return;
                 }
+                let nextLevelExpandRowColumns = $detail.find('.kv-state-expanded');
+                nextLevelExpandRowColumns.trigger('click');
                 if (!hideProgress) {
                     beginLoading($cell);
                 }
