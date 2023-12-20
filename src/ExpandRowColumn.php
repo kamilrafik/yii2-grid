@@ -433,10 +433,10 @@ HTML;
             return parent::renderHeaderCellContent();
         }
         $icon = $this->expandIcon;
-        $css = 'kv-expand-header-icon kv-state-expanded';
+        $css = 'kv-expand-header-icon kv-state-collapsed';
         if ($this->defaultHeaderState === GridView::ROW_EXPANDED) {
             $icon = $this->collapseIcon;
-            $css = 'kv-expand-header-icon kv-state-collapsed';
+            $css = 'kv-expand-header-icon kv-state-expanded';
         }
 
         return "<div class='{$css}'>{$icon}</div>";

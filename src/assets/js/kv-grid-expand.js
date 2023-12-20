@@ -26,10 +26,10 @@ var kvExpandRow;
                 $el.removeClass(css).addClass(css);
             }
         },
-        setExpanded: function ($i) {
+        setCollapsed: function ($i) {
             $i.removeClass('kv-state-expanded').addClass('kv-state-collapsed');
         },
-        setCollapsed: function ($i) {
+        setExpanded: function ($i) {
             $i.removeClass('kv-state-collapsed').addClass('kv-state-expanded');
         },
         handler: function ($el, event, callback, skipNS) {
@@ -145,23 +145,28 @@ var kvExpandRow;
                     if ($hdrCell.hasClass(progress) || $cells.length === 0) {
                         return;
                     }
-                    var collAll = $h.isCollapsed($hdrIcon), expAll = $h.isExpanded($hdrIcon),
+                    var collAll = $h.isExpanded($hdrIcon), expAll = $h.isCollapsed($hdrIcon),
                         opt = $.extend(true, {}, options, {expandAll: expAll, collapseAll: collAll});
                     beginLoading($hdrCell);
                     let nextLevelExpandRowColumns = null;
                     if (expAll) {
                         expandHeaderCell();
                         $grid.trigger('kvexprow:toggleAll', [extraData, false]);
-                        nextLevelExpandRowColumns = $hdrCell.closest('table').find('.kv-state-collapsed');
+                        nextLevelExpandRowColumns = $hdrCell.closest('table').find('tbody:first > tr:not(.kv-expand-detail-row) .kv-state-collapsed');
                     } else if (collAll) {
                         collapseHeaderCell();
                         $grid.trigger('kvexprow:toggleAll', [extraData, true]);
-                        nextLevelExpandRowColumns = $hdrCell.closest('table').find('.kv-state-expanded');
+                        nextLevelExpandRowColumns = $hdrCell.closest('table').find('tbody:first > tr:not(.kv-expand-detail-row) .kv-state-expanded');
                     }
                     if (nextLevelExpandRowColumns) {
                         nextLevelExpandRowColumns.trigger('click');
                     }
                     endLoading($hdrCell);
+                    if (expAll) {
+                        $h.setExpanded($hdrIcon);
+                    } else if (collAll) {
+                        $h.setCollapsed($hdrIcon);
+                    }
                     // kvExpandRow(opt, id);
                 });
             };
@@ -315,12 +320,12 @@ var kvExpandRow;
                 };
                 if (animate) {
                     $detail.slideDown(duration, function () {
-                        $h.setCollapsed($icon);
+                        $h.setExpanded($icon);
                         $detail.show(fnShowComplete);
                     });
                 } else {
                     $detail.show(fnShowComplete);
-                    $h.setCollapsed($icon);
+                    $h.setExpanded($icon);
                 }
                 // needed when used together with grouping
                 if ($row.attr('data-group-key')) {
@@ -360,7 +365,7 @@ var kvExpandRow;
                         $detailRow.before($detail).remove();
                     }
                     $detail.appendTo($container);
-                    $h.setExpanded($icon);
+                    $h.setCollapsed($icon);
                     // needed when used together with grouping
                     if ($row.attr('data-group-key')) {
                         var $rowsBefore = $row.prevAll('.' + gridId);
