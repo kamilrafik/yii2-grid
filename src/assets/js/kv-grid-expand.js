@@ -152,11 +152,11 @@ var kvExpandRow;
                     if (expAll) {
                         expandHeaderCell();
                         $grid.trigger('kvexprow:toggleAll', [extraData, false]);
-                        nextLevelExpandRowColumns = $hdrCell.closest('table').find('tbody:first > tr:not(.kv-expand-detail-row) .kv-state-collapsed');
+                        nextLevelExpandRowColumns = $hdrCell.closest('table').find('tbody:first > tr:not(.kv-expand-detail-row) > td > .kv-expand-row > .kv-state-collapsed');
                     } else if (collAll) {
                         collapseHeaderCell();
                         $grid.trigger('kvexprow:toggleAll', [extraData, true]);
-                        nextLevelExpandRowColumns = $hdrCell.closest('table').find('tbody:first > tr:not(.kv-expand-detail-row) .kv-state-expanded');
+                        nextLevelExpandRowColumns = $hdrCell.closest('table').find('tbody:first > tr:not(.kv-expand-detail-row) > td > .kv-expand-row > .kv-state-expanded');
                     }
                     if (nextLevelExpandRowColumns) {
                         nextLevelExpandRowColumns.trigger('click');
