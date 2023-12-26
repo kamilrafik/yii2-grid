@@ -26,10 +26,10 @@ var kvExpandRow;
                 $el.removeClass(css).addClass(css);
             }
         },
-        setExpanded: function ($i) {
+        setCollapsed: function ($i) {
             $i.removeClass('kv-state-expanded').addClass('kv-state-collapsed');
         },
-        setCollapsed: function ($i) {
+        setExpanded: function ($i) {
             $i.removeClass('kv-state-collapsed').addClass('kv-state-expanded');
         },
         handler: function ($el, event, callback, skipNS) {
@@ -56,7 +56,7 @@ var kvExpandRow;
             $hdrIcon = $hdrCell.find('.kv-expand-header-icon'),
             collapseAll = options.collapseAll === undefined ? false : options.collapseAll,
             expandAll = options.expandAll === undefined ? false : options.expandAll,
-            $cells = $grid.find('td.kv-expand-icon-cell' + idCss + ' .kv-expand-row:not(.kv-state-disabled)'),
+            $cells = $grid.find('td.kv-expand-icon-cell' + idCss + ' > .kv-expand-row:not(.kv-state-disabled)'),
             numRows = $cells.length, progress = 'kv-expand-detail-loading',
             getCols = function () {
                 var $col = $grid.find('td.kv-expand-icon-cell' + idCss + ':first'),
@@ -145,17 +145,29 @@ var kvExpandRow;
                     if ($hdrCell.hasClass(progress) || $cells.length === 0) {
                         return;
                     }
-                    var collAll = $h.isCollapsed($hdrIcon), expAll = $h.isExpanded($hdrIcon),
+                    var collAll = $h.isExpanded($hdrIcon), expAll = $h.isCollapsed($hdrIcon),
                         opt = $.extend(true, {}, options, {expandAll: expAll, collapseAll: collAll});
                     beginLoading($hdrCell);
+                    let nextLevelExpandRowColumns = null;
                     if (expAll) {
                         expandHeaderCell();
                         $grid.trigger('kvexprow:toggleAll', [extraData, false]);
+                        nextLevelExpandRowColumns = $hdrCell.closest('table').find('tbody:first > tr:not(.kv-expand-detail-row) > td > .kv-expand-row > .kv-state-collapsed');
                     } else if (collAll) {
                         collapseHeaderCell();
                         $grid.trigger('kvexprow:toggleAll', [extraData, true]);
+                        nextLevelExpandRowColumns = $hdrCell.closest('table').find('tbody:first > tr:not(.kv-expand-detail-row) > td > .kv-expand-row > .kv-state-expanded');
                     }
-                    kvExpandRow(opt, id);
+                    if (nextLevelExpandRowColumns) {
+                        nextLevelExpandRowColumns.trigger('click');
+                    }
+                    endLoading($hdrCell);
+                    if (expAll) {
+                        $h.setExpanded($hdrIcon);
+                    } else if (collAll) {
+                        $h.setCollapsed($hdrIcon);
+                    }
+                    // kvExpandRow(opt, id);
                 });
             };
         ToggleManager = function ($element) {
@@ -241,7 +253,7 @@ var kvExpandRow;
             load: function (postProcess) {
                 var self = this, $cell = self.$cell, $detail = self.$detail, vKey = self.vKey, vInd = self.vInd,
                     params = $.extend({expandRowKey: vKey, expandRowInd: vInd}, extraData),
-                    reload = enableCache ? $detail.html().length === 0 : true;
+                    reload = enableCache ? (!$detail.html() || $detail.html().length === 0) : true;
                 if (detailUrl.length > 0 && reload) {
                     $.ajax({
                         type: 'POST',
@@ -294,14 +306,26 @@ var kvExpandRow;
                 $detail.wrap('<td colspan="' + cols + '">').parent().wrap(newRow);
                 $icon.html(collapseIcon);
                 $cell.attr('title', collapseTitle);
+                let fnShowComplete = function () {
+                    let nextLevelExpandRowColumns = $(this).find('[data-expand-row-column-hash-var]');
+                    if (nextLevelExpandRowColumns.length) {
+                        eval(
+                            'kvExpandRow('
+                            + nextLevelExpandRowColumns.attr('data-expand-row-column-hash-var')
+                            + ', "'
+                            + nextLevelExpandRowColumns.attr('data-expand-row-column-col-id')
+                            + '");'
+                        );
+                    }
+                };
                 if (animate) {
                     $detail.slideDown(duration, function () {
-                        $h.setCollapsed($icon);
-                        $detail.show();
+                        $h.setExpanded($icon);
+                        $detail.show(fnShowComplete);
                     });
                 } else {
-                    $detail.show();
-                    $h.setCollapsed($icon);
+                    $detail.show(fnShowComplete);
+                    $h.setExpanded($icon);
                 }
                 // needed when used together with grouping
                 if ($row.attr('data-group-key')) {
@@ -322,11 +346,13 @@ var kvExpandRow;
                 }
             },
             collapse: function (hideProgress) {
-                var self = this, $row = self.$row, $icon = self.$icon, $cell = self.$cell, $detail = self.$detail,
+                var self = this, $row = self.$row, $icon = self.$icon, $cell = self.$cell, $detail = self.$detail.first(),
                     $container = self.$container;
                 if ($h.isCollapsed($icon)) {
                     return;
                 }
+                let nextLevelExpandRowColumns = $detail.find('.kv-state-expanded');
+                nextLevelExpandRowColumns.trigger('click');
                 if (!hideProgress) {
                     beginLoading($cell);
                 }
@@ -339,7 +365,7 @@ var kvExpandRow;
                         $detailRow.before($detail).remove();
                     }
                     $detail.appendTo($container);
-                    $h.setExpanded($icon);
+                    $h.setCollapsed($icon);
                     // needed when used together with grouping
                     if ($row.attr('data-group-key')) {
                         var $rowsBefore = $row.prevAll('.' + gridId);

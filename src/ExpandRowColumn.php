@@ -315,6 +315,8 @@ class ExpandRowColumn extends DataColumn
         $this->_hashVar = 'kvExpandRow_'.hash('crc32', $clientOptions);
         $this->_colId = "{$gridId}_{$this->columnKey}";
         Html::addCssClass($this->headerOptions, $this->_colId);
+        $this->contentOptions['data-expand-row-column-hash-var'] = $this->_hashVar;
+        $this->contentOptions['data-expand-row-column-col-id'] = $this->_colId;
         $view->registerJs("var {$this->_hashVar} = {$clientOptions};\n", View::POS_HEAD);
         $view->registerJs("kvExpandRow({$this->_hashVar}, '{$this->_colId}');");
     }
@@ -431,10 +433,10 @@ HTML;
             return parent::renderHeaderCellContent();
         }
         $icon = $this->expandIcon;
-        $css = 'kv-expand-header-icon kv-state-expanded';
+        $css = 'kv-expand-header-icon kv-state-collapsed';
         if ($this->defaultHeaderState === GridView::ROW_EXPANDED) {
             $icon = $this->collapseIcon;
-            $css = 'kv-expand-header-icon kv-state-collapsed';
+            $css = 'kv-expand-header-icon kv-state-expanded';
         }
 
         return "<div class='{$css}'>{$icon}</div>";
