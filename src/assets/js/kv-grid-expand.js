@@ -346,7 +346,7 @@ var kvExpandRow;
                 }
             },
             collapse: function (hideProgress) {
-                var self = this, $row = self.$row, $icon = self.$icon, $cell = self.$cell, $detail = self.$detail,
+                var self = this, $row = self.$row, $icon = self.$icon, $cell = self.$cell, $detail = self.$detail.first(),
                     $container = self.$container;
                 if ($h.isCollapsed($icon)) {
                     return;
