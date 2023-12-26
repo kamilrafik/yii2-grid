@@ -306,8 +306,11 @@ var kvExpandRow;
                 $detail.wrap('<td colspan="' + cols + '">').parent().wrap(newRow);
                 $icon.html(collapseIcon);
                 $cell.attr('title', collapseTitle);
-                let fnShowComplete = function () {
-                    let nextLevelExpandRowColumns = $(this).find('[data-expand-row-column-hash-var]');
+                let fnShowComplete = function (element) {
+                    if (!element) {
+                        element = $(this);
+                    }
+                    let nextLevelExpandRowColumns = element.find('[data-expand-row-column-hash-var]');
                     if (nextLevelExpandRowColumns.length) {
                         eval(
                             'kvExpandRow('
@@ -324,7 +327,8 @@ var kvExpandRow;
                         $detail.show(fnShowComplete);
                     });
                 } else {
-                    $detail.show(fnShowComplete);
+                    $detail.show();
+                    fnShowComplete();
                     $h.setExpanded($icon);
                 }
                 // needed when used together with grouping
